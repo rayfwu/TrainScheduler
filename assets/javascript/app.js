@@ -9,27 +9,48 @@ messagingSenderId: "158121090419"
 };
 firebase.initializeApp(config);
 
-function sayHi() {
-    console.log("Hi");
-}
+var database = firebase.database();
 
 function updateSchedule() {
     var name        = $("#name-input").val().trim();
     var destination = $("#destination-input").val().trim();
-    var time        = $("#time-input").val().trim();
+    var start       = moment($("#time-input").val().trim(), "HH:mm");
     var frequency   = $("#frequency-input").val().trim();
+    var arrival     = nextArrival(start, moment(), frequency);
+
+    // database.ref().push({
+    //     name: name,
+    //     role: role,
+    //     date: date,
+    //     rate: rate,
+    //     monthsWorked: convertedToMonths,
+    //     total: total
+        
+    // }, (error) => {
+    //     console.log(error);
+    // })
 
     var tableRow =  "<tr>" +
                     "<td>" + name + "</td>" +
                     "<td>" + destination + "</td>" +
                     "<td>" + frequency + "</td>" +
-                    "<td>" + time + "</td>" +
-                    "<td>" + "placeholder" + "</td>" +
+                    "<td>" + arrival.format("HH:mm") + "</td>" +
+                    "<td>" + arrival.diff(moment(), "minutes") + "</td>" +
                     "</tr>";
 
     $("#train-table").append(tableRow);
 
     clearForm();
+}
+
+function nextArrival(start, now, frequency) {
+    var minutesElapsed = now.diff(start, "minutes");
+    var stopsElapsed = Math.floor(minutesElapsed / frequency);
+    var nextStopMinutes = (stopsElapsed + 1) * frequency;
+
+    start.add(nextStopMinutes, "minutes");
+    return start;
+    // return start.format("HH:mm");
 }
 
 function clearForm() {
@@ -43,13 +64,29 @@ $("#submit-button").click(function() {
     updateSchedule();
 });
 
+// checking if database had any child updates & updating html
+// database.ref().on("child_added", function(childSnapshot) {
+//     var tableText = 
+//     "<tr>" +
+//     "<td>" + childSnapshot.val().name + "</td>" +
+//     "<td>" + childSnapshot.val().role + "</td>" +
+//     "<td>" + childSnapshot.val().date + "</td>" +
+//     "<td>" + childSnapshot.val().monthsWorked + "</td>" +
+//     "<td>" + childSnapshot.val().rate + "</td>" +
+//     "<td>" + childSnapshot.val().total + "</td>";
+
+//     $("#form-body").append(tableText);
+// }, (error) => {
+//     console.log(error);
+// })
+
 // Autofilling test fields to quickly fill out the forms
 
 $("#test-1").click(function() {
     $("#name-input").val("Thomas");
     $("#destination-input").val("New York");
     $("#time-input").val("03:30");
-    $("#frequency-input").val("10");
+    $("#frequency-input").val("12");
 });
 
 $("#test-2").click(function() {
@@ -65,15 +102,3 @@ $("#test-3").click(function() {
     $("#time-input").val("02:00");
     $("#frequency-input").val("30");
 });
-
-/*
-var now = moment();
-var start = moment("03:00 AM", "hh:mm A");
-var frequency = 10;
-var minutesElapsed - start.diff(now, "minutes");
-var stopsElapsed = Math.floor(minutesElapsed / frequency);
-var nextStopMinutes = (stopsElapsed + 1) * frequency;
-
-start.add(nextStopMinutes, "minutes");
-console.log(start.format("hh:mm A"));
-*/
