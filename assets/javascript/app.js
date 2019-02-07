@@ -1,11 +1,11 @@
 // Initialize Firebase
 var config = {
-apiKey: "AIzaSyCTTI3Diuxngk5EZUJqqqUdsPeXPpwiajQ",
-authDomain: "trainscheduler-f730f.firebaseapp.com",
-databaseURL: "https://trainscheduler-f730f.firebaseio.com",
-projectId: "trainscheduler-f730f",
-storageBucket: "trainscheduler-f730f.appspot.com",
-messagingSenderId: "158121090419"
+    apiKey: "AIzaSyCTTI3Diuxngk5EZUJqqqUdsPeXPpwiajQ",
+    authDomain: "trainscheduler-f730f.firebaseapp.com",
+    databaseURL: "https://trainscheduler-f730f.firebaseio.com",
+    projectId: "trainscheduler-f730f",
+    storageBucket: "trainscheduler-f730f.appspot.com",
+    messagingSenderId: "158121090419"
 };
 firebase.initializeApp(config);
 
@@ -18,27 +18,28 @@ function updateSchedule() {
     var frequency   = $("#frequency-input").val().trim();
     var arrival     = nextArrival(start, moment(), frequency);
 
-    // database.ref().push({
-    //     name: name,
-    //     role: role,
-    //     date: date,
-    //     rate: rate,
-    //     monthsWorked: convertedToMonths,
-    //     total: total
+    database.ref().push({
+        name       : name,
+        destination: destination,
+        frequency  : frequency,
+        next       : arrival.format("HH: mm"),
+        minutes    : arrival.diff(moment(), "minutes")
         
-    // }, (error) => {
-    //     console.log(error);
-    // })
+    }, (error) => {
+        console.log(error);
+    })
 
-    var tableRow =  "<tr>" +
-                    "<td>" + name + "</td>" +
-                    "<td>" + destination + "</td>" +
-                    "<td>" + frequency + "</td>" +
-                    "<td>" + arrival.format("HH:mm") + "</td>" +
-                    "<td>" + arrival.diff(moment(), "minutes") + "</td>" +
-                    "</tr>";
+    console.log("breakpoint");
 
-    $("#train-table").append(tableRow);
+    // var tableRow =  "<tr>" +
+    //                 "<td>" + name + "</td>" +
+    //                 "<td>" + destination + "</td>" +
+    //                 "<td>" + frequency + "</td>" +
+    //                 "<td>" + arrival.format("HH:mm") + "</td>" +
+    //                 "<td>" + arrival.diff(moment(), "minutes") + "</td>" +
+    //                 "</tr>";
+
+    // $("#train-table").append(tableRow);
 
     clearForm();
 }
@@ -65,20 +66,39 @@ $("#submit-button").click(function() {
 });
 
 // checking if database had any child updates & updating html
-// database.ref().on("child_added", function(childSnapshot) {
-//     var tableText = 
-//     "<tr>" +
-//     "<td>" + childSnapshot.val().name + "</td>" +
-//     "<td>" + childSnapshot.val().role + "</td>" +
-//     "<td>" + childSnapshot.val().date + "</td>" +
-//     "<td>" + childSnapshot.val().monthsWorked + "</td>" +
-//     "<td>" + childSnapshot.val().rate + "</td>" +
-//     "<td>" + childSnapshot.val().total + "</td>";
+database.ref().on("child_added", function(childSnapshot) {
 
-//     $("#form-body").append(tableText);
-// }, (error) => {
-//     console.log(error);
-// })
+    /*
+        name
+        destination
+        frequency
+        next arrival
+        minutes away
+    */
+
+    var tableRow =  "<tr>" +
+                    "<td>" + childSnapshot.val().name + "</td>" +
+                    "<td>" + childSnapshot.val().destination + "</td>" +
+                    "<td>" + childSnapshot.val().frequency + "</td>" +
+                    "<td>" + childSnapshot.val().next + "</td>" +
+                    "<td>" + childSnapshot.val().minutes + "</td>" +
+                    "</tr>";
+
+    $("#train-table").append(tableRow);
+
+    // var tableText = 
+    // "<tr>" +
+    // "<td>" + childSnapshot.val().name + "</td>" +
+    // "<td>" + childSnapshot.val().role + "</td>" +
+    // "<td>" + childSnapshot.val().date + "</td>" +
+    // "<td>" + childSnapshot.val().monthsWorked + "</td>" +
+    // "<td>" + childSnapshot.val().rate + "</td>" +
+    // "<td>" + childSnapshot.val().total + "</td>";
+
+    // $("#form-body").append(tableText);
+}, (error) => {
+    console.log(error);
+})
 
 // Autofilling test fields to quickly fill out the forms
 
